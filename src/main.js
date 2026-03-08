@@ -1,7 +1,11 @@
 import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { inject } from "@vercel/analytics";
 import "./style.css"
+
+// Initialize Vercel Web Analytics
+inject();
 
 // scene
 const scene = new THREE.Scene();
