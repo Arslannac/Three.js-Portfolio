@@ -1,2 +1,21 @@
 # Three.js Portfolio Project
-## This poroject is about three.js and it's application. For now i am just working on creating 3D scene. On future this project is converted to my portfolio.
+## This is my portfolio. I developed it with three.js and vanilla javascript. simplex-noise used for snow generation on the ground.
+
+## Clone Project
+```
+git clone https://github.com/Arslannac/Three.js-Portfolio.git
+```
+## Go to project folder
+```
+cd Three.js-Portfolio
+```
+
+## Install dependencies
+```
+npm install
+```
+
+## Run the project
+```
+npm run dev
+```

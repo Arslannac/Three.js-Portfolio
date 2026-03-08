@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // scene
@@ -8,10 +7,10 @@ const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x0b1020, 10, 80);
 
 // camera
-const camera = new THREE.PerspectiveCamera(26.5650, innerWidth / innerHeight, 0.1, 1000);
-camera.position.set(0, 10, 25);
+const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.5, 100);
+camera.position.set(0, 10, 40);
 camera.rotation.set(
-  THREE.MathUtils.degToRad(26.5650),
+  THREE.MathUtils.degToRad(-10),
   0,
   0
 )
@@ -24,17 +23,16 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setClearColor(0xacd2ed);
 
-const controls = new OrbitControls( camera, renderer.domElement );
-controls.update();
-
 // lights
 scene.add(new THREE.AmbientLight(0xffffff, 1));
-scene.add(new THREE.DirectionalLight(0xffffff, 1.0).position.set(0, 10, 50));
+const dLight = new THREE.DirectionalLight(0xffffff, 1.0);
+dLight.position.set(0, 10, 50) 
+scene.add(dLight);
 scene.add(new THREE.HemisphereLight(0xacd2ed, 0xdfe9ff, 1.0));
 
 // ground: base terrain + snow
-const WORLD_SIZE = 30;
-const GRID = 100;
+const WORLD_SIZE = 128;
+const GRID = 256;
 const VERTS = (GRID + 1) * (GRID + 1);
 
 const groundGeo = new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE, GRID, GRID);
@@ -64,7 +62,7 @@ function fbmSimplex(x, z , {
   let amp = 1.0;
   let freq = 1.0;
   let sum = 0.0;
-  let norm = 0.0;
+  let norm = 0.5;
 
   for (let o = 0; o < octaves; o++) {
     // simplex gives ~[-1, 1]
@@ -105,7 +103,7 @@ function applyGround() {
 
 function cellIndexFromXZ(x, z) {
   const half = WORLD_SIZE / 2;
-  const u = (x = half) / WORLD_SIZE;
+  const u = (x + half) / WORLD_SIZE;
   const v = (z - half) /WORLD_SIZE;
 
   const ix = Math.max(0, Math.min(GRID, Math.round(u * GRID)));
@@ -123,7 +121,7 @@ buildBaseTerrain();
 applyGround();
 
 // snow: InstancedMesh + deposit into snowMap
-const FLAKES  = 2500;
+const FLAKES  = 5000;
 const SPAWN_Y = 18;
 const MIN_Y   = -8;
 
@@ -146,11 +144,17 @@ function resetFlake(i) {
   flake.x[i] = (Math.random() - 0.5) * WORLD_SIZE;
   flake.z[i] = (Math.random() - 0.5) * WORLD_SIZE;
   flake.y[i] = SPAWN_Y + Math.random() * 10;
-  flake.vy[i] = 0;
+  flake.vy[i] = -Math.random() * 0.3;
   flake.drift[i] = (Math.random() * 2 - 1) * 0.35;
 }
 
-for (let i = 0; i < FLAKES; i++) resetFlake();
+for (let i = 0; i < FLAKES; i++) {
+  flake.x[i] = (Math.random() - 0.5) * WORLD_SIZE;
+  flake.z[i] = (Math.random() - 0.5) * WORLD_SIZE;
+  flake.y[i] = SPAWN_Y + Math.random() * 50;
+  flake.vy[i] = -Math.random() * 0.3;
+  flake.drift[i] = (Math.random() * 2 - 1) * 0.35;
+}
 
 const dummy = new THREE.Object3D();
 const clock = new THREE.Clock();
@@ -207,7 +211,7 @@ function animate(now) {
     flake.y[i] += flake.vy[i] *dt
 
     if(flake.y[i] < MIN_Y) {
-      resetFlake();
+      resetFlake(i);
       continue;
     }
 
@@ -229,7 +233,6 @@ function animate(now) {
   // update ground less often for performance
   if((frame++ % 5) === 0) applyGround();
 
-  controls.update();
   mixer.update(dt);
   renderer.render(scene, camera);
 }
@@ -240,4 +243,22 @@ addEventListener("resize", () => {
   camera.aspect = innerWidth / innerWidth;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+});
+
+const hidButton = document.getElementById("hid-container");
+const card = document.getElementById("card");
+const showButton = document.getElementById("show-container");
+
+hidButton.addEventListener("click", () => {
+  card.classList.toggle("hidden");
+  showButton.classList.toggle("hidden");
+  showButton.classList.add("notice");
+  card.classList.remove("notice2")
+});
+
+showButton.addEventListener("click", () => {
+  card.classList.toggle("hidden")
+  showButton.classList.toggle("hidden");
+  showButton.classList.remove("notice");
+  card.classList.add("notice2")
 });
