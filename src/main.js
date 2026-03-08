@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import "./style.css"
 
 // scene
 const scene = new THREE.Scene();
@@ -17,8 +18,8 @@ camera.rotation.set(
 // camera.lookAt(0, 0, -25)
 
 // renderer
-const canvas = document.querySelector('#base');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha: true });
+const canvas = document.getElementById('base');
+const renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true, alpha: true });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setClearColor(0xacd2ed);
@@ -185,7 +186,7 @@ function depositSnow(idx) {
 
 // load and add glb to scene
 const loader = new GLTFLoader();
-const gltf = await loader.loadAsync("../assets/winter_cabin.glb");
+const gltf = await loader.loadAsync(`${import.meta.env.BASE_URL}models/wintercabin.glb`);
 gltf.scene.rotation.set(0, THREE.MathUtils.degToRad(90), 0);
 gltf.scene.position.set(0, 0.1, 0);
 gltf.scene.scale.set(1, 1, 1);
